@@ -1,0 +1,58 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - BACKEND_URL=http://backend:${BACKEND_PORT}
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT}:4000"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_URI=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}
+      - REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
+      - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/temperature-process
+    depends_on:
+      - mongodb
+      - redis
+      - n8n
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "${MONGODB_PORT}:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "${N8N_PORT}:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  mongodb_data:
+  redis_data:
+  n8n_data:
