@@ -1,7 +1,25 @@
+import { useEffect } from "react";
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
 
 export function Welcome() {
+
+  useEffect(() => {
+
+    const ws = new WebSocket(`ws://localhost:4000`);
+    ws.onopen = () => {
+      console.log('Connected to server');
+      ws.send('Hello, Server!');
+    };
+
+    ws.onmessage = (event) => {
+      console.log(`Message from server: ${event.data}`);
+    };
+
+    ws.onclose = () => {
+      console.log('Connection closed');
+    };
+  }, [])
   return (
     <main className="flex items-center justify-center pt-16 pb-4">
       <div className="flex-1 flex flex-col items-center gap-16 min-h-0">

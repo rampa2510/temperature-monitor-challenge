@@ -10,6 +10,8 @@ services:
       - BACKEND_URL=http://backend:${BACKEND_PORT}
     depends_on:
       - backend
+    volumes:
+      - ./frontend/.react-router:/app/.react-router
 
   backend:
     build:
