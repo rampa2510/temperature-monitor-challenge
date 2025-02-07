@@ -1,141 +1,168 @@
-# Real-Time Temperature Monitoring System Challenge 🚀
+# Real-Time Temperature Monitoring System
 
-Welcome to our Senior Full-Stack Developer technical challenge! This challenge invites you to build a modern, real-time temperature monitoring system that showcases your expertise in full-stack development and microservices architecture.
+A modern real-time temperature monitoring system built with React (Remix), Node.js, MongoDB, Redis, and n8n workflow automation.
 
-## 🎯 Challenge Overview
+## System Architecture
 
-Create a sophisticated real-time temperature monitoring system that processes and visualizes temperature data through a modern web interface. Your solution will demonstrate your ability to:
+The system consists of five main components:
 
--   Implement real-time data streams
--   Design service-oriented architecture
--   Create responsive user interfaces
--   Integrate workflow automation
--   Handle distributed system challenges
+1. **Frontend (Remix)**
+   - Real-time temperature display
+   - Connection status indicator
+   - Last 5 readings with timestamps
+   - Status badges (NORMAL/HIGH)
 
-## 🏗️ System Architecture
+2. **Backend (Node.js + TypeScript)**
+   - Temperature data generation
+   - WebSocket connections
+   - Data processing and storage
+   - API endpoints
 
-![System Architecture](./assets/architecture.png)
+3. **MongoDB**
+   - Persistent storage for temperature readings
+   - Historical data storage
 
-The system comprises four main components:
+4. **Redis**
+   - Real-time data caching
+   - Pub/Sub for real-time updates
 
--   **Frontend**: Real-time dashboard built with React
--   **Backend**: Node.js service for data generation and processing
--   **Database**: MongoDB for data persistence
--   **Processing**: n8n workflow (preferred) or Node.js processing service
+5. **n8n**
+   - Workflow automation
+   - Temperature data processing
+   - Status determination
 
-### Processing Approach Options
+## Prerequisites
 
-1. **Preferred Approach: n8n Workflow Integration**
+- Docker and Docker Compose
+- Node.js 20.x (for local development)
+- Git
 
-    - Implement temperature processing using n8n workflows
-    - Demonstrates ability to work with workflow automation tools
-    - Shows understanding of service integration
+## Installation & Setup
 
-2. **Alternative Approach: Node.js Processing**
-    - Implement temperature processing directly in Node.js
-    - Use if n8n integration presents significant challenges
-    - Must maintain same data flow and processing logic
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   cd temperature-monitor
+   ```
 
-## 💡 Core Features
+2. **Environment Setup**
+   ```bash
+   # Copy example environment file
+   cp .env.example .env
 
-### Main Dashboard
+   # Update .env with your configuration if needed
+   ```
 
-![Main Dashboard](./assets/normal-state.png)
+3. **Build and Start Services**
+   ```bash
+   # Build all services
+   docker-compose build
 
--   Real-time temperature display (2-second updates)
--   Connection status indicator
--   Last 5 readings with timestamps
--   Status badges (NORMAL/HIGH) updated after processing
-    -   Initial reading shows temperature only
-    -   Status updates post-processing
+   # Start all services
+   docker-compose up -d
+   ```
 
-## ⏱️ Time Expectations
+4. **Verify Services**
+   ```bash
+   # Check if all services are running
+   docker-compose ps
 
-While you have 24 hours to submit, expect to spend 2-3 hours of focused development time. The window allows for:
+   # Check service logs
+   docker-compose logs -f
+   ```
 
--   Core implementation
--   Documentation
--   Testing and refinement
--   Optional n8n workflow setup
+## Available Services
 
-## 📋 Submission Requirements
+After starting, the following services will be available:
 
-### Repository Structure
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:4000
+- MongoDB: localhost:27017
+- Redis: localhost:6379
+- n8n Dashboard: http://localhost:5678
 
+## Development
+
+### Running Services Individually
+
+**Frontend (Remix)**
+```bash
+cd frontend
+npm install
+npm run dev
 ```
-your-solution/
-├── frontend/
-│   ├── src/
-│   └── Dockerfile
-├── backend/
-│   ├── src/
-│   └── Dockerfile
-├── n8n/               # If using n8n approach
-│   └── workflows/
-├── docker-compose.yml
-└── README.md
+
+**Backend**
+```bash
+cd backend
+npm install
+npm run dev
 ```
 
-### Required Documentation
+### Environment Variables
 
-1. Setup Instructions
-2. API Documentation
-3. Architecture Overview
-4. Processing Approach Documentation
-    - Clearly indicate chosen approach
-    - Explain implementation decisions
+Key environment variables that need to be set in `.env`:
 
-## 🎯 Evaluation Criteria
+```env
+# Ports
+FRONTEND_PORT=3000
+BACKEND_PORT=4000
+MONGODB_PORT=27017
+REDIS_PORT=6379
+N8N_PORT=5678
 
-### Technical Excellence (40%)
+# Hosts
+MONGODB_HOST=mongodb
+REDIS_HOST=redis
+N8N_HOST=n8n
 
--   Code quality and organization
--   System architecture
--   Performance considerations
--   Error handling
--   Testing approach
+# Database
+MONGODB_DB=temperature_db
 
-### Feature Implementation (30%)
+# n8n
+N8N_PROTOCOL=http
+```
 
--   Real-time functionality
--   Data processing implementation
-    -   n8n implementation (+10 bonus points)
-    -   Node.js implementation (standard points)
--   UI/UX execution
--   Service integration
+## API Documentation
 
-### Best Practices (30%)
+### Health Check
+```
+GET /health
+Response: { "status": "ok" }
+```
 
--   Documentation quality
--   Git practices
--   Code organization
--   Development setup
+### Temperature Data
+```
+GET /api/temperature/latest
+Response: { "temperature": number, "timestamp": string, "status": string }
+```
 
-## 🚀 Getting Started
+## Monitoring
 
-1. Review `specification.md`
-2. Choose processing approach
-3. Begin implementation
+- Docker health checks are configured for all services
+- Check container health: `docker ps`
+- View logs: `docker-compose logs -f [service-name]`
 
-## 📮 Submission Process
+## Troubleshooting
 
-1. Create a public GitHub repository
-2. Implement your solution
-3. Add comprehensive documentation
-4. Share the repository URL
+1. **Services Not Starting**
+   - Check logs: `docker-compose logs [service-name]`
+   - Verify ports are not in use
+   - Ensure all required environment variables are set
 
-## 🎯 Success Criteria
+2. **Database Connection Issues**
+   - Verify MongoDB is running: `docker-compose ps mongodb`
+   - Check MongoDB logs: `docker-compose logs mongodb`
+   - Ensure connection string is correct in .env
 
-Your solution should demonstrate:
+3. **n8n Workflow Issues**
+   - Access n8n dashboard at http://localhost:5678
+   - Check n8n logs: `docker-compose logs n8n`
 
--   Clean, maintainable code
--   Robust real-time data handling
--   Thoughtful architecture decisions
--   Professional documentation
--   Successful processing implementation (either approach)
+## License
 
-Ready to showcase your expertise? Let's see what you can build! 🚀
+[Your License Here]
 
-## 🤝 Questions?
+## Contributing
 
-For any clarifications, feel free to reach out via LinkedIn.
+[Your Contributing Guidelines Here]
