@@ -19,16 +19,28 @@ interface WebSocketError extends Error {
 const websocketPlugin: FastifyPluginAsync = async (fastify) => {
 	await fastify.register(fastifyWebsocket, {
 		options: {
-			maxPayload: 1048576, // 1MB
-			clientTracking: true, // Enable client tracking
+			maxPayload: 1048576,
+			clientTracking: true,
 			verifyClient: (info: VerifyClientInfo, next: VerifyClientNext) => {
-				// Example authentication using headers
-				const apiKey = info.req.headers['api-key'];
-				if (!apiKey || apiKey !== fastify.config.API_KEY) {
+				// Check header first
+				const headerApiKey = info.req.headers['api-key'];
+
+				// Then check URL parameters
+				const url = new URL(info.req.url!, `http://${info.req.headers.host}`);
+				const urlApiKey = url.searchParams.get('apiKey');
+
+				// Accept either header or URL parameter
+				const providedApiKey = headerApiKey || urlApiKey;
+
+				console.log(providedApiKey, fastify.config.API_KEY)
+
+				if (!providedApiKey || providedApiKey !== fastify.config.API_KEY) {
+					fastify.log.warn('WebSocket connection rejected: Invalid API key');
 					return next(false);
 				}
 				next(true);
 			}
+
 		},
 		errorHandler: (
 			error: WebSocketError,
