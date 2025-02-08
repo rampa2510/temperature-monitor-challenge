@@ -1,50 +1,70 @@
-import { WebSocketServer } from 'ws';
-import { createServer } from 'http';
+import Fastify from 'fastify';
 import { config } from './config/env';
+import websocketPlugin from './plugins/websocket';
+import swaggerPlugin from './plugins/swagger';
+import healthRoutes from './routes/health';
+import websocketRoutes from './routes/websocket';
 
-const port = config.PORT || 4000;
+async function buildApp() {
+	const fastify = Fastify({
+		logger: {
+			level: config.NODE_ENV === 'development' ? 'debug' : 'info',
+			transport: config.NODE_ENV === 'development'
+				? { target: 'pino-pretty' }
+				: undefined
+		}
+	});
 
-// Create HTTP server for health endpoint
-const server = createServer((req, res) => {
-	if (req.url === '/health') {
-		res.writeHead(200, { 'Content-Type': 'application/json' });
-		res.end(JSON.stringify({ status: 'ok' }));
-		return;
+	// Expose config to fastify instance
+	fastify.decorate('config', config);
+
+	// Register WebSocket plugin 
+	await fastify.register(websocketPlugin);
+
+	// Register WebSocket routes (no prefix)
+	await fastify.register(websocketRoutes);
+
+	// Create a plugin for HTTP routes with /api prefix
+	await fastify.register(async (app) => {
+		// Register Swagger plugins
+		await app.register(swaggerPlugin);
+		// Register HTTP routes
+		await app.register(healthRoutes);
+	}, { prefix: '/api' });
+
+	return fastify;
+}
+
+async function start() {
+	try {
+		const app = await buildApp();
+
+		await app.listen({
+			port: parseInt(config.PORT, 10),
+			host: '0.0.0.0'
+		});
+
+		app.log.info(`Server is running on port ${config.PORT}`);
+		app.log.info(`Environment: ${config.NODE_ENV}`);
+		app.log.info(`Documentation available at http://localhost:${config.PORT}/api/documentation`);
+		app.log.info(`Health check available at http://localhost:${config.PORT}/api/health`);
+		app.log.info(`WebSocket available at ws://localhost:${config.PORT}/ws`);
+	} catch (err) {
+		console.error('Error starting server:', err);
+		process.exit(1);
 	}
-	res.writeHead(404);
-	res.end();
+}
+
+// Handle unhandled rejections
+process.on('unhandledRejection', (err) => {
+	console.error('Unhandled rejection:', err);
+	process.exit(1);
 });
 
-// Create WebSocket server attached to HTTP server
-const wss = new WebSocketServer({ server });
-
-// WebSocket connection handler
-wss.on('connection', (ws) => {
-	console.log('New client connected');
-
-	// Send welcome message
-	ws.send('Welcome to the WebSocket server!');
-
-	// Handle incoming messages
-	ws.on('message', (message) => {
-		console.log(`Received message: ${message}`);
-		// Echo the message back to client
-		ws.send(`Server received: ${message}`);
-	});
-
-	// Handle client disconnection
-	ws.on('close', () => {
-		console.log('Client disconnected');
-	});
-
-	// Handle connection errors
-	ws.on('error', (error) => {
-		console.error('WebSocket error:', error);
-	});
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+	console.error('Uncaught exception:', err);
+	process.exit(1);
 });
 
-// Start server
-server.listen(port, () => {
-	console.log(`Server running on port ${port}`);
-	console.log(`WebSocket server is ready`);
-});
+start();
