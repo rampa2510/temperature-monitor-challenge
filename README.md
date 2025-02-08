@@ -1,8 +1,9 @@
 # Real-Time Temperature Monitoring System
-A modern real-time temperature monitoring system built with React (Remix), Node.js, MongoDB, Redis, and n8n workflow automation.
+
+A modern real-time temperature monitoring system built with React (Remix), Node.js, MongoDB, and n8n workflow automation.
 
 ## System Architecture
-The system consists of five main components:
+The system consists of four main components:
 1. **Frontend (Remix)**
    - Real-time temperature display
    - Connection status indicator
@@ -17,10 +18,7 @@ The system consists of five main components:
 3. **MongoDB**
    - Persistent storage for temperature readings
    - Historical data storage
-4. **Redis**
-   - Real-time data caching
-   - Pub/Sub for real-time updates
-5. **n8n**
+4. **n8n**
    - Workflow automation
    - Temperature data processing (threshold > 25°C = HIGH)
    - Status determination
@@ -66,7 +64,6 @@ After starting, the following services will be available:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 - MongoDB: localhost:27017
-- Redis: localhost:6379
 - n8n Dashboard: http://localhost:5678
 
 ## WebSocket Events
@@ -100,40 +97,6 @@ Response: {
 }
 ```
 
-### Process Reading
-```
-POST /api/readings/process
-Request: {
-  id: string
-  temperature: number
-  timestamp: string
-}
-Response: {
-  success: boolean
-  reading: {
-    id: string
-    status: 'NORMAL' | 'HIGH'
-    processedAt: string
-  }
-}
-```
-
-## Development
-### Running Services Individually
-**Frontend (Remix)**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-**Backend**
-```bash
-cd backend
-npm install
-npm run dev
-```
-
 ### Environment Variables
 Key environment variables that need to be set in `.env`:
 ```env
@@ -141,12 +104,10 @@ Key environment variables that need to be set in `.env`:
 FRONTEND_PORT=3000
 BACKEND_PORT=5000
 MONGODB_PORT=27017
-REDIS_PORT=6379
 N8N_PORT=5678
 
 # Hosts
 MONGODB_HOST=mongodb
-REDIS_HOST=redis
 N8N_HOST=n8n
 
 # Database
@@ -163,13 +124,21 @@ The project includes:
 - WebSocket connection testing
 - Processing logic verification
 
-Run tests with:
-```bash
-# Frontend tests
-cd frontend && npm test
+### Running Tests with Docker Compose
 
-# Backend tests
-cd backend && npm test
+To run the tests for your project, use the **docker-compose.test.yml** configuration. This will bring up the services required for testing (like the backend and MongoDB) without interfering with your development setup.
+
+1. **Run Tests with docker-compose.test.yml**:
+   ```bash
+   docker-compose -f docker-compose.test.yml up --build
+   ```
+
+### Running Development Services with docker-compose.dev.yml
+
+For local development and testing, use **docker-compose.dev.yml**. This configuration is optimized for development, including volume mounts for live code updates and other development-related settings.
+
+```bash
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
 ## Monitoring
@@ -191,6 +160,20 @@ cd backend && npm test
 3. **n8n Workflow Issues**
    - Access n8n dashboard at http://localhost:5678
    - Check n8n logs: `docker compose logs n8n`
+
+## n8n Workflow Setup
+1. **Import the Workflow**: After starting the n8n service, open the **n8n Dashboard** at [http://localhost:5678](http://localhost:5678). 
+   - Go to the "Workflows" tab.
+   - Click on the "Import" button and select the `temperature-processing-workflow.json` file located in the `/n8n-workflow` directory.
+  
+2. **Workflow Details**:
+   - The workflow listens to the `temperature-process` webhook and processes the temperature readings.
+   - If the temperature exceeds 25°C, the status is marked as `HIGH`, otherwise, it’s marked as `NORMAL`.
+
+3. **Access n8n Logs**: If you encounter any issues, you can view the logs for n8n with:
+   ```bash
+   docker-compose logs -f n8n
+   ```
 
 ## Success Metrics
 - Real-time data flow with 2-second update intervals

@@ -1,0 +1,91 @@
+{
+  "name": "Assignment",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "process_temperature_reading",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f6eeb70a-f670-4572-94eb-f59c1427037b",
+      "name": "Webhook",
+      "webhookId": "bde762f1-735c-4881-b5d4-e66e59e95c72",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "7jOvMlulY33LyfjU",
+          "name": "Test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  console.log(item)\n  const temperature = parseFloat(item.json.body[\"temperature\"]);\n  console.log(temperature)\nlet status = \"NORMAL\";\nif (temperature > 25) {\n    status = \"HIGH\";\n}\nreturn [\n  {\n    json: {\n      id: item.json.body[\"id\"],\n      temperature: temperature,\n      status: status,\n      processedAt: new Date().toISOString(),\n    },\n  },\n];\n\n}\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "cdfcac15-3a67-4bbf-9431-735a16b19b40",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "79ab7ccd-48f0-4d12-94fe-1911dde63025",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fdac1e4f-25cd-4d24-91b3-f63845363b8a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8667bc6cd71d90d93b3d3a5280bf39caf2826f32a48866ffc39333bcec625ae9"
+  },
+  "id": "rIrrA3BTOlc4zram",
+  "tags": []
+}
