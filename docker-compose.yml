@@ -24,11 +24,9 @@ services:
       - NODE_ENV=${NODE_ENV}
       - API_KEY=${API_KEY}
       - MONGODB_URI=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}
-      - REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
       - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/temperature-process
     depends_on:
       - mongodb
-      - redis
       - n8n
 
   mongodb:
@@ -38,12 +36,6 @@ services:
     volumes:
       - mongodb_data:/data/db
 
-  redis:
-    image: redis:alpine
-    ports:
-      - "${REDIS_PORT}:6379"
-    volumes:
-      - redis_data:/data
 
   n8n:
     image: n8nio/n8n
@@ -58,5 +50,4 @@ services:
 
 volumes:
   mongodb_data:
-  redis_data:
   n8n_data:

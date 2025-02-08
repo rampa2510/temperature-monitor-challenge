@@ -35,6 +35,7 @@ async function buildApp() {
 	return fastify;
 }
 
+
 async function start() {
 	try {
 		const app = await buildApp();
