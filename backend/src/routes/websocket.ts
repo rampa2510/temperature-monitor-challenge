@@ -3,6 +3,7 @@ import { createWebSocketManager } from '../services/websocketManager';
 import { handleTemperature } from '../handlers/temperatureHandler';
 import { startGenerator, stopGenerator } from '@/services/temperatureGenerator';
 import { config } from '@/config/env';
+import { createDatabaseService } from '../services/database';
 
 const websocketRoutes: FastifyPluginAsync = async (fastify) => {
 	// Log n8n configuration on startup
@@ -13,6 +14,7 @@ const websocketRoutes: FastifyPluginAsync = async (fastify) => {
 	});
 
 	const wsManager = createWebSocketManager(fastify.log);
+	const dbService = createDatabaseService(fastify.log);
 
 	fastify.get('/ws', {
 		websocket: true,
@@ -26,7 +28,7 @@ const websocketRoutes: FastifyPluginAsync = async (fastify) => {
 		if (wsManager.getClientCount() === 1) {
 			fastify.log.info('Starting temperature generator');
 			startGenerator((reading) => {
-				handleTemperature(reading, wsManager, fastify.log).catch(error => {
+				handleTemperature(reading, wsManager, dbService, fastify.log).catch(error => {
 					fastify.log.error('Failed to process temperature reading:', error);
 				});
 			});

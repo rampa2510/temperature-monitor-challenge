@@ -4,6 +4,7 @@ import websocketPlugin from './plugins/websocket';
 import swaggerPlugin from './plugins/swagger';
 import healthRoutes from './routes/health';
 import websocketRoutes from './routes/websocket';
+import { connectDB } from './config/database';
 
 export async function buildApp() {
 	const fastify = Fastify({
@@ -33,6 +34,7 @@ export async function buildApp() {
 async function start() {
 	try {
 		const app = await buildApp();
+		await connectDB(app.log)
 		await app.listen({
 			port: parseInt(config.PORT, 10),
 			host: '0.0.0.0'
