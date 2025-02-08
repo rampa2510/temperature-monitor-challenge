@@ -24,7 +24,7 @@ services:
       - NODE_ENV=${NODE_ENV}
       - API_KEY=${API_KEY}
       - MONGODB_URI=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}
-      - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/temperature-process
+      - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/process_temperature_reading 
     depends_on:
       - mongodb
       - n8n

@@ -9,10 +9,11 @@ services:
     environment:
       - NODE_ENV=test
       - MONGODB_URI=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}
-      - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/temperature-process
+      - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/process_temperature_reading 
       - API_KEY=${API_KEY}
     depends_on:
       - mongodb
+      - n8n
     volumes:
       - ./backend/src:/app/src
 
@@ -23,5 +24,18 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "${N8N_PORT}:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+    volumes:
+      - n8n_data:/home/node/.n8n
+
 volumes:
   mongodb_data:
+  n8n_data:

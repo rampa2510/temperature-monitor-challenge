@@ -94,6 +94,7 @@ const websocketRoutes: FastifyPluginAsync = async (fastify) => {
 			});
 
 		} catch (error) {
+			console.log({ error })
 			if (error instanceof Error && error.name === 'AbortError') {
 				fastify.log.error('n8n request timed out after 5 seconds');
 			} else {
@@ -111,18 +112,6 @@ const websocketRoutes: FastifyPluginAsync = async (fastify) => {
 		}
 	}
 
-	// Test n8n connection on startup
-	try {
-		const testResponse = await fetch(config.N8N_WEBHOOK_URL, {
-			method: 'OPTIONS'
-		});
-		fastify.log.info('n8n connection test:', {
-			status: testResponse.status,
-			ok: testResponse.ok
-		});
-	} catch (error) {
-		fastify.log.error('Failed to connect to n8n:', error);
-	}
 
 	fastify.get('/ws', {
 		websocket: true,
