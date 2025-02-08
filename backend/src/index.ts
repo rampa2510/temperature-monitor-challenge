@@ -5,6 +5,7 @@ import swaggerPlugin from './plugins/swagger';
 import healthRoutes from './routes/health';
 import websocketRoutes from './routes/websocket';
 import { connectDB } from './config/database';
+import readingRoutes from './routes/readings';
 
 export async function buildApp() {
 	const fastify = Fastify({
@@ -27,6 +28,7 @@ export async function buildApp() {
 		await app.register(swaggerPlugin);
 		// Register HTTP routes
 		await app.register(healthRoutes);
+		await app.register(readingRoutes);
 	}, { prefix: '/api' });
 	return fastify;
 }

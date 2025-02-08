@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - BACKEND_URL=http://backend:${BACKEND_PORT}
-      - VITE_WEBSOCKET_URL= ws://localhost:${BACKEND_PORT}/ws
+      - VITE_WEBSOCKET_URL=ws://localhost:${BACKEND_PORT}/ws
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
       - VITE_API_KEY=${API_KEY}

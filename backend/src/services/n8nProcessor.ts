@@ -1,6 +1,6 @@
 import { FastifyBaseLogger, } from 'fastify';
 import { TemperatureReading, ProcessedReading } from '../types/temperature';
-import { config } from '@/config/env';
+import { config } from '../config/env';
 
 const N8N_AUTH = 'Basic dGVzdDp0ZXN0';
 const TIMEOUT = 5000;

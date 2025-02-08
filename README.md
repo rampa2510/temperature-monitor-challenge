@@ -2,31 +2,54 @@
 
 A modern real-time temperature monitoring system built with React (Remix), Node.js, MongoDB, and n8n workflow automation.
 
+## ⚠️  Important Production Notice
+There is currently a known issue with environment variables not being properly loaded in the production build due to complexities between Remix, Docker, and environment variable handling during the build process. Please use the development configuration for both development and production environments until this is resolved.
+
 ## System Architecture
-The system consists of four main components:
-1. **Frontend (Remix)**
-   - Real-time temperature display
-   - Connection status indicator
-   - Last 5 readings with timestamps
-   - Status badges (NORMAL/HIGH)
-   - Temperature range: 15-30°C
-2. **Backend (Node.js + TypeScript)**
-   - Temperature data generation (every 2 seconds)
-   - WebSocket connections
-   - Data processing and storage
-   - API endpoints
-3. **MongoDB**
-   - Persistent storage for temperature readings
-   - Historical data storage
-4. **n8n**
-   - Workflow automation
-   - Temperature data processing (threshold > 25°C = HIGH)
-   - Status determination
+
+### 1. Frontend (Remix)
+- Large central temperature display
+- Real-time connection status indicator
+- Timestamp of last update
+- Last 5 readings display with:
+  - Temperature value
+  - Status badge (NORMAL/HIGH)
+  - Relative timestamp
+  - Current connection state
+- Temperature range: 15-30°C
+- Responsive UI updates
+
+### 2. Backend (Node.js + TypeScript)
+- Temperature data generation (every 2 seconds)
+- WebSocket connections management
+- Data processing and storage
+- REST API endpoints
+- Error handling and logging
+
+### 3. MongoDB
+- Persistent storage for temperature readings
+- Historical data storage
+- Efficient querying support
+- Reading history tracking
+- Processing status tracking
+
+### 4. n8n
+- Workflow automation
+- Temperature data processing (threshold > 25°C = HIGH)
+- Status determination
+- Webhook-based integration
 
 ## Prerequisites
 - Docker and Docker Compose
 - Node.js 20.x (for local development)
 - Git
+
+## Core Technologies
+- Frontend: React 18+
+- Backend: Node.js 18+
+- Database: MongoDB
+- Processing: n8n (preferred) or Node.js
+- Container: Docker
 
 ## Installation & Setup
 1. **Clone the Repository**
@@ -42,16 +65,20 @@ The system consists of four main components:
    # Update .env with your configuration if needed
    ```
 
-3. **Build and Start Services**
+3. **Import n8n workflow**
+   - Access n8n dashboard at http://localhost:5678
+   - Import workflow from `/n8n-workflow/Assignment.json
+
+4. **Build and Start Services**
    ```bash
    # For Development
    docker compose -f docker-compose.dev.yml up --build
 
-   # For Production
+   # For Production (please dont use for now)
    docker compose up --build
    ```
 
-4. **Verify Services**
+5. **Verify Services**
    ```bash
    # Check if all services are running
    docker compose ps
@@ -59,15 +86,41 @@ The system consists of four main components:
    docker compose logs -f
    ```
 
-## Available Services
-After starting, the following services will be available:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-- MongoDB: localhost:27017
-- n8n Dashboard: http://localhost:5678
+## Communication Protocols
 
-## WebSocket Events
-### Server to Client Events
+### REST API Endpoints
+
+#### Health Check
+```
+GET /api/health
+Response: { 
+  status: 'ok' | 'error',
+  timestamp: string 
+}
+```
+
+#### Process Reading
+```
+POST /api/readings/process
+Request: {
+  id: string
+  temperature: number
+  timestamp: string
+}
+Response: {
+  success: boolean
+  reading: {
+    id: string
+    status: 'NORMAL' | 'HIGH'
+    processedAt: string
+  }
+}
+```
+
+### WebSocket Events
+
+#### Server to Client Events
+
 1. `temperature_reading`
    ```typescript
    {
@@ -76,6 +129,7 @@ After starting, the following services will be available:
      timestamp: string
    }
    ```
+
 2. `processed_reading`
    ```typescript
    {
@@ -87,18 +141,23 @@ After starting, the following services will be available:
    }
    ```
 
-## API Documentation
-### Health Check
-```
-GET /health
-Response: { 
-  status: 'ok' | 'error',
-  timestamp: string 
-}
-```
+## Processing Implementation
 
-### Environment Variables
-Key environment variables that need to be set in `.env`:
+### n8n Workflow (Preferred)
+1. **Setup Instructions**
+   - Access n8n dashboard at http://localhost:5678
+   - Import workflow from `/n8n-workflow/Assignment.json
+   - Configure webhook trigger
+   - Verify temperature threshold processing (> 25°C = HIGH)
+
+### Alternative Node.js Processing
+- Implements processing service in backend
+- Maintains same data flow structure
+- Applies identical processing logic
+- Ensures consistent response format
+
+## Environment Variables
+Key environment variables for `.env`:
 ```env
 # Ports
 FRONTEND_PORT=3000
@@ -117,36 +176,43 @@ MONGODB_DB=temperature_db
 N8N_PROTOCOL=http
 ```
 
+## Service Dependencies
+- Backend → MongoDB
+- Backend → Processing Service (n8n or Node.js)
+- Frontend → Backend (WebSocket)
+
 ## Testing
-The project includes:
+
+### Test Categories
 - Unit tests for core logic
 - Integration tests for API endpoints
 - WebSocket connection testing
 - Processing logic verification
 
-### Running Tests with Docker Compose
+### Running Tests
 
-To run the tests for your project, use the **docker-compose.test.yml** configuration. This will bring up the services required for testing (like the backend and MongoDB) without interfering with your development setup.
-
-1. **Run Tests with docker-compose.test.yml**:
+1. **With Docker Compose**:
    ```bash
    docker-compose -f docker-compose.test.yml up --build
    ```
 
-### Running Development Services with docker-compose.dev.yml
+2. **Development Environment**:
+   ```bash
+   docker-compose -f docker-compose.dev.yml up --build
+   ```
 
-For local development and testing, use **docker-compose.dev.yml**. This configuration is optimized for development, including volume mounts for live code updates and other development-related settings.
+## API Documentation
+Complete API documentation is available at `/api/documentation` using Swagger UI.
 
-```bash
-docker-compose -f docker-compose.dev.yml up --build
-```
+## Monitoring and Troubleshooting
 
-## Monitoring
-- Docker health checks are configured for all services
+### Health Monitoring
+- Docker health checks configured for all services
 - Check container health: `docker ps`
 - View logs: `docker compose logs -f [service-name]`
 
-## Troubleshooting
+### Common Issues and Solutions
+
 1. **Services Not Starting**
    - Check logs: `docker compose logs [service-name]`
    - Verify ports are not in use
@@ -161,23 +227,18 @@ docker-compose -f docker-compose.dev.yml up --build
    - Access n8n dashboard at http://localhost:5678
    - Check n8n logs: `docker compose logs n8n`
 
-## n8n Workflow Setup
-1. **Import the Workflow**: After starting the n8n service, open the **n8n Dashboard** at [http://localhost:5678](http://localhost:5678). 
-   - Go to the "Workflows" tab.
-   - Click on the "Import" button and select the `temperature-processing-workflow.json` file located in the `/n8n-workflow` directory.
-  
-2. **Workflow Details**:
-   - The workflow listens to the `temperature-process` webhook and processes the temperature readings.
-   - If the temperature exceeds 25°C, the status is marked as `HIGH`, otherwise, it’s marked as `NORMAL`.
-
-3. **Access n8n Logs**: If you encounter any issues, you can view the logs for n8n with:
-   ```bash
-   docker-compose logs -f n8n
-   ```
-
 ## Success Metrics
+
+### Core Requirements
 - Real-time data flow with 2-second update intervals
 - Accurate temperature processing (threshold > 25°C)
 - Responsive UI updates with status badges
 - Data persistence in MongoDB
 - Comprehensive error handling
+
+### Excellence Indicators
+- n8n workflow implementation
+- Clean architecture
+- Comprehensive testing
+- Clear documentation
+- Professional code quality

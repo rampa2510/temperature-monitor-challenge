@@ -5,6 +5,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 
 export default defineConfig(async () => {
+
+  console.log({ env: import.meta.env })
   return {
     plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   };

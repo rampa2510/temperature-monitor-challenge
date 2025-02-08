@@ -1,4 +1,4 @@
-import { config } from '@/config/env';
+import { config } from '../config/env';
 import { FastifyBaseLogger } from 'fastify';
 import mongoose from 'mongoose';
 

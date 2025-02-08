@@ -1,8 +1,8 @@
-import { processReading } from '@/services/n8nProcessor';
+import { processReading } from '../services/n8nProcessor';
 import { createWebSocketManager, } from '../services/websocketManager';
 import { TemperatureReading } from '../types/temperature';
 import { FastifyBaseLogger } from 'fastify';
-import { createDatabaseService } from '@/services/database';
+import { createDatabaseService } from '../services/database';
 
 
 export const handleTemperature = async (

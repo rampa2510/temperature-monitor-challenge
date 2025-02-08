@@ -5,14 +5,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "${FRONTEND_PORT}:3000"
+
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - BACKEND_URL=http://backend:${BACKEND_PORT}
-      - API_KEY=${API_KEY}
+      - VITE_WEBSOCKET_URL=ws://localhost:${BACKEND_PORT}/ws
+      - VITE_API_KEY=${API_KEY}
     depends_on:
       - backend
-    volumes:
-      - ./frontend/.react-router:/app/.react-router
 
   backend:
     build:
@@ -21,10 +19,11 @@ services:
     ports:
       - "${BACKEND_PORT}:4000"
     environment:
-      - NODE_ENV=${NODE_ENV}
+      - NODE_ENV=production
       - API_KEY=${API_KEY}
       - MONGODB_URI=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}
       - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/process_temperature_reading 
+      - API_KEY=${API_KEY}
     depends_on:
       - mongodb
       - n8n

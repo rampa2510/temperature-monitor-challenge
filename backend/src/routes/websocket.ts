@@ -1,8 +1,8 @@
 import { FastifyPluginAsync } from 'fastify';
 import { createWebSocketManager } from '../services/websocketManager';
 import { handleTemperature } from '../handlers/temperatureHandler';
-import { startGenerator, stopGenerator } from '@/services/temperatureGenerator';
-import { config } from '@/config/env';
+import { startGenerator, stopGenerator } from '../services/temperatureGenerator';
+import { config } from '../config/env';
 import { createDatabaseService } from '../services/database';
 
 const websocketRoutes: FastifyPluginAsync = async (fastify) => {
