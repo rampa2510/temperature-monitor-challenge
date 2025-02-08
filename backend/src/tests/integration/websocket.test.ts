@@ -22,7 +22,7 @@ describe('WebSocket Tests', () => {
 		await app.close();
 	});
 
-	it('should connect with valid API key', () => {
+	it.concurrent('should connect with valid API key', () => {
 		const ws = new WebSocket(WS_URL, {
 			headers: { 'api-key': API_KEY }
 		});
@@ -33,7 +33,7 @@ describe('WebSocket Tests', () => {
 		});
 	});
 
-	it('should reject connection without API key', () => {
+	it.concurrent('should reject connection without API key', () => {
 		const ws = new WebSocket(WS_URL);
 
 		ws.on('error', () => {
@@ -41,7 +41,7 @@ describe('WebSocket Tests', () => {
 		});
 	});
 
-	it('should receive temperature readings', () => {
+	it.concurrent('should receive temperature readings', () => {
 		const ws = new WebSocket(WS_URL, {
 			headers: { 'api-key': API_KEY }
 		});
