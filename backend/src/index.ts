@@ -5,7 +5,7 @@ import swaggerPlugin from './plugins/swagger';
 import healthRoutes from './routes/health';
 import websocketRoutes from './routes/websocket';
 
-async function buildApp() {
+export async function buildApp() {
 	const fastify = Fastify({
 		logger: {
 			level: config.NODE_ENV === 'development' ? 'debug' : 'info',
@@ -14,16 +14,12 @@ async function buildApp() {
 				: undefined
 		}
 	});
-
 	// Expose config to fastify instance
 	fastify.decorate('config', config);
-
 	// Register WebSocket plugin 
 	await fastify.register(websocketPlugin);
-
 	// Register WebSocket routes (no prefix)
 	await fastify.register(websocketRoutes);
-
 	// Create a plugin for HTTP routes with /api prefix
 	await fastify.register(async (app) => {
 		// Register Swagger plugins
@@ -31,20 +27,16 @@ async function buildApp() {
 		// Register HTTP routes
 		await app.register(healthRoutes);
 	}, { prefix: '/api' });
-
 	return fastify;
 }
-
 
 async function start() {
 	try {
 		const app = await buildApp();
-
 		await app.listen({
 			port: parseInt(config.PORT, 10),
 			host: '0.0.0.0'
 		});
-
 		app.log.info(`Server is running on port ${config.PORT}`);
 		app.log.info(`Environment: ${config.NODE_ENV}`);
 		app.log.info(`Documentation available at http://localhost:${config.PORT}/api/documentation`);
@@ -52,20 +44,31 @@ async function start() {
 		app.log.info(`WebSocket available at ws://localhost:${config.PORT}/ws`);
 	} catch (err) {
 		console.error('Error starting server:', err);
-		process.exit(1);
+		if (config.NODE_ENV !== 'test') {
+			process.exit(1);
+		}
 	}
 }
 
 // Handle unhandled rejections
 process.on('unhandledRejection', (err) => {
 	console.error('Unhandled rejection:', err);
-	process.exit(1);
+	if (config.NODE_ENV !== 'test') {
+		process.exit(1);
+	}
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
 	console.error('Uncaught exception:', err);
-	process.exit(1);
+	if (config.NODE_ENV !== 'test') {
+		process.exit(1);
+	}
 });
 
-start();
+// Only start the server if we're not in test mode
+if (config.NODE_ENV !== 'test') {
+	start();
+}
+
+export { start };

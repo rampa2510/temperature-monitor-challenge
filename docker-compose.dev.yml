@@ -1,0 +1,58 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - BACKEND_URL=http://backend:${BACKEND_PORT}
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - API_KEY=${API_KEY}
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - ./frontend/.react-router:/app/.react-router
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${BACKEND_PORT}:4000"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_URI=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}
+      - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/temperature-process
+      - API_KEY=${API_KEY}
+    depends_on:
+      - mongodb
+      - n8n
+    volumes:
+      - ./backend/src:/app/src
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "${MONGODB_PORT}:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "${N8N_PORT}:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  mongodb_data:
+  n8n_data:

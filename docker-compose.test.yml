@@ -1,0 +1,27 @@
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    ports:
+      - "${BACKEND_PORT}:4000"
+    environment:
+      - NODE_ENV=test
+      - MONGODB_URI=mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}
+      - N8N_WEBHOOK_URL=http://${N8N_HOST}:${N8N_PORT}/webhook/temperature-process
+      - API_KEY=${API_KEY}
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend/src:/app/src
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "${MONGODB_PORT}:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
