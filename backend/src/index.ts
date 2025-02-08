@@ -15,9 +15,6 @@ const server = createServer((req, res) => {
 	res.end();
 });
 
-console.log("hello")
-
-
 // Create WebSocket server attached to HTTP server
 const wss = new WebSocketServer({ server });
 
